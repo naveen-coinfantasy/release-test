@@ -2,7 +2,9 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-
+import { autoUpdater } from 'electron-updater'
+import log from 'electron-log/main'
+log.initialize()
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -53,6 +55,7 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+  autoUpdater.checkForUpdatesAndNotify()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -60,7 +63,22 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+autoUpdater.on('checking-for-update', () => {
+  log.info('checking-for-update')
+})
 
+autoUpdater.on('update-available', () => {
+  log.info('update-available')
+})
+autoUpdater.on('update-not-available', () => {
+  log.info('update-not-available')
+})
+autoUpdater.on('error', (err) => {
+  log.info('error', err)
+})
+autoUpdater.on('update-downloaded', () => {
+  log.info('update-downloaded')
+})
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
